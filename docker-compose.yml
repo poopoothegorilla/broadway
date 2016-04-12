@@ -7,6 +7,8 @@ services:
       - .:/go/src/github.com/namely/broadway
     command: go run main.go
     environment:
+      BROADWAY_PLAYBOOKS_PATH: "/go/src/github.com/namely/broadway/examples/playbooks"
+      BROADWAY_MANIFESTS_PATH: "/go/src/github.com/namely/broadway/examples/manifests"
       SLACK_WEBHOOK: ""
       ETCD_HOST: "http://localhost:4001"
       ETCD_PATH: "/broadway"
@@ -20,6 +22,8 @@ services:
       - .:/go/src/github.com/namely/broadway
     command: echo "hello"
     environment:
+      BROADWAY_PLAYBOOKS_PATH: "/go/src/github.com/namely/broadway/examples/playbooks"
+      BROADWAY_MANIFESTS_PATH: "/go/src/github.com/namely/broadway/examples/manifests"
       SLACK_WEBHOOK: ""
       ETCD_HOST: "http://localhost:4001"
       ETCD_PATH: "/broadwaytest"

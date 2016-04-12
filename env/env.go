@@ -2,6 +2,7 @@ package env
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/golang/glog"
 )
@@ -32,17 +33,41 @@ var (
 
 	// SlackWebhook is the Slack incoming webhook
 	SlackWebhook string
+
+	// ManifestsPath is the absolute path where manifest files are read from
+	ManifestsPath string
+
+	// PlaybooksPath is the absolute path where playbook files are read from
+	PlaybooksPath string
+)
+
+var (
+	cwd                  string
+	defaultManifestsPath string
+	defaultPlaybooksPath string
 )
 
 // LoadEnvs sets env.* variables to their OS-provided value
 func LoadEnvs() {
+	ManifestsPath = loadw("BROADWAY_MANIFESTS_PATH")
+	if ManifestsPath == "" {
+		ManifestsPath = defaultManifestsPath
+	}
+	PlaybooksPath = loadw("BROADWAY_PLAYBOOKS_PATH")
+	if PlaybooksPath == "" {
+		PlaybooksPath = defaultPlaybooksPath
+	}
 	AuthBearerToken = loadw("BROADWAY_AUTH_TOKEN")
+
+	ServerHost = loadw("HOST")
+
 	SlackWebhook = loadw("SLACK_WEBHOOK")
 	SlackToken = loadw("SLACK_VERIFICATION_TOKEN")
-	ServerHost = loadw("HOST")
+
 	K8sServiceHost = loadw("KUBERNETES_SERVICE_HOST")
 	K8sServicePort = loadw("KUBERNETES_PORT_443_TCP_PORT")
 	K8sNamespace = loadf("KUBERNETES_NAMESPACE")
+
 	EtcdHost = loadw("ETCD_HOST")
 	EtcdPath = loadw("ETCD_PATH")
 }
@@ -64,5 +89,11 @@ func loadf(key string) string {
 }
 
 func init() {
+	if d, err := os.Getwd(); err == nil {
+		cwd = d
+	}
+	// Caution, when runnning tests, cwd will be a subfolder, not namely/broadway
+	defaultManifestsPath = filepath.Join(cwd, "manifests")
+	defaultPlaybooksPath = filepath.Join(cwd, "playbooks")
 	LoadEnvs()
 }

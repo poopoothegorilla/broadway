@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"path/filepath"
+
+	"github.com/golang/glog"
+	"github.com/namely/broadway/env"
 
 	"gopkg.in/yaml.v2"
 )
@@ -36,41 +38,15 @@ type Playbook struct {
 	Tasks []Task   `yaml:"tasks"`
 }
 
-// ManifestRoot points to the folder where manifests are found, relative to
-// playbooks/
-var ManifestRoot = "../manifests/"
+// AllPlaybooks is a map of playbook id's to playbooks
+var AllPlaybooks map[string]*Playbook
 
-// ManifestExtension is added to each task manifest item to make a filename
-var ManifestExtension = ".yml"
-
-// SetManifestRoot ensures a folder exists, then sets ManifestRoot to that
-// folder.
-func SetManifestRoot(newRoot string) error {
-	if _, err := os.Stat(newRoot); err != nil {
-		return err
+func init() {
+	var err error
+	AllPlaybooks, err = LoadPlaybookFolder(env.PlaybooksPath)
+	if err != nil {
+		glog.Fatal(err)
 	}
-	ManifestRoot = newRoot
-	return nil
-}
-
-// ManifestsPresent iterates through the Manifests and PodManifest items on a
-// task, and checks that each represents a file on disk
-func (t Task) ManifestsPresent() error {
-	for _, name := range t.Manifests {
-		filename := name + ManifestExtension
-		path := filepath.Join(ManifestRoot, filename)
-		if _, err := os.Stat(path); err != nil {
-			return err
-		}
-	}
-	if len(t.PodManifest) > 0 {
-		filename := t.PodManifest + ManifestExtension
-		path := filepath.Join(ManifestRoot, filename)
-		if _, err := os.Stat(path); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 // Validate checks for ID, Name, and Tasks on a playbook
@@ -97,9 +73,9 @@ func (p *Playbook) ValidateTasks() error {
 		if len(task.Manifests) == 0 && len(task.PodManifest) == 0 {
 			return errors.New("Task requires at least one manifest or a pod manifest")
 		}
-		//if err := task.ManifestsPresent(); err != nil {
-		//	return err
-		//}
+		if err := task.ManifestsPresent(); err != nil {
+			return err
+		}
 	}
 	return nil
 }

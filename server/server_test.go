@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/namely/broadway/deployment"
 	"github.com/namely/broadway/env"
 	"github.com/namely/broadway/instance"
 	"github.com/namely/broadway/services"
@@ -81,10 +80,10 @@ func TestAuthFailureHints(t *testing.T) {
 func TestInstanceCreateWithValidAttributes(t *testing.T) {
 
 	i := map[string]interface{}{
-		"playbook_id": "test",
-		"id":          "test",
+		"playbook_id": "helloplaybook",
+		"id":          "TestInstanceCreateWithValidAttributes",
 		"vars": map[string]string{
-			"version": "ok",
+			"word": "gorilla",
 		},
 	}
 
@@ -119,14 +118,14 @@ func TestCreateInstanceWithInvalidAttributes(t *testing.T) {
 
 func TestGetInstanceWithValidPath(t *testing.T) {
 	store := store.New()
-	i := &instance.Instance{PlaybookID: "foo", ID: "doesExist"}
+	i := &instance.Instance{PlaybookID: "helloplaybook", ID: "TestGetInstanceWithValidPath"}
 	service := services.NewInstanceService(store)
 	_, err := service.Create(i)
 	if err != nil {
 		t.Log(err.Error())
 	}
 
-	req, w := testutils.GetRequest(t, "/instance/foo/doesExist")
+	req, w := testutils.GetRequest(t, "/instance/helloplaybook/TestGetInstanceWithValidPath")
 	req = auth(req)
 	makeRequest(req, w)
 
@@ -134,7 +133,7 @@ func TestGetInstanceWithValidPath(t *testing.T) {
 }
 
 func TestGetInstanceWithInvalidPath(t *testing.T) {
-	req, w := testutils.GetRequest(t, "/instance/missed/notfound")
+	req, w := testutils.GetRequest(t, "/instance/vanished/TestGetInstanceWithInvalidPath")
 	req = auth(req)
 	makeRequest(req, w)
 
@@ -142,8 +141,8 @@ func TestGetInstanceWithInvalidPath(t *testing.T) {
 }
 
 func TestGetInstancesWithFullPlaybook(t *testing.T) {
-	testInstance1 := &instance.Instance{PlaybookID: "testPlaybookFull", ID: "testInstance1"}
-	testInstance2 := &instance.Instance{PlaybookID: "testPlaybookFull", ID: "testInstance2"}
+	testInstance1 := &instance.Instance{PlaybookID: "helloplaybook", ID: "TestGetInstancesWithFullPlaybook1"}
+	testInstance2 := &instance.Instance{PlaybookID: "helloplaybook", ID: "TestGetInstancesWithFullPlaybook2"}
 	service := services.NewInstanceService(store.New())
 	_, err := service.Create(testInstance1)
 	_, err = service.Create(testInstance2)
@@ -151,19 +150,11 @@ func TestGetInstancesWithFullPlaybook(t *testing.T) {
 		t.Log(err.Error())
 	}
 
-	req, w := testutils.GetRequest(t, "/instances/testPlaybookFull")
+	req, w := testutils.GetRequest(t, "/instances/helloplaybook")
 	req = auth(req)
 	makeRequest(req, w)
 
 	assert.Equal(t, http.StatusOK, w.Code, "Response code should be 200 OK")
-}
-
-func TestGetInstancesWithEmptyPlaybook(t *testing.T) {
-	req, w := testutils.GetRequest(t, "/instances/testPlaybookFull")
-	req = auth(req)
-	makeRequest(req, w)
-
-	assert.Equal(t, http.StatusOK, w.Code, "Response code should be 200")
 }
 
 func TestGetStatusFailures(t *testing.T) {
@@ -175,7 +166,7 @@ func TestGetStatusFailures(t *testing.T) {
 	}{
 		{
 			"GET",
-			"/status/goodPlaybook/badInstance",
+			"/status/helloplaybook/TestGetStatusFailures",
 			404,
 			"Not Found",
 		},
@@ -198,16 +189,16 @@ func TestGetStatusFailures(t *testing.T) {
 }
 func TestGetStatusWithGoodPath(t *testing.T) {
 	testInstance1 := &instance.Instance{
-		PlaybookID: "goodPlaybook",
-		ID:         "goodInstance",
+		PlaybookID: "helloplaybook",
+		ID:         "TestGetStatusWithGoodPath",
 		Status:     instance.StatusDeployed}
-	service := services.NewInstanceService(store.New())
-	_, err := service.Create(testInstance1)
+	is := services.NewInstanceService(store.New())
+	_, err := is.Create(testInstance1)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	req, w := testutils.GetRequest(t, "/status/goodPlaybook/goodInstance")
+	req, w := testutils.GetRequest(t, "/status/helloplaybook/TestGetStatusWithGoodPath")
 	req = auth(req)
 	makeRequest(req, w)
 
@@ -338,33 +329,4 @@ func TestDeployMissing(t *testing.T) {
 	err = json.Unmarshal(w.Body.Bytes(), &errorResponse)
 	assert.Nil(t, err)
 	assert.Contains(t, errorResponse["error"], "Not Found")
-}
-
-func TestDeployGood(t *testing.T) {
-	task := deployment.Task{
-		Name: "First step",
-		Manifests: []string{
-			"test",
-		},
-	}
-	// Ensure playbook is in memory
-	p := &deployment.Playbook{
-		ID:    "test",
-		Name:  "Test deployment",
-		Meta:  deployment.Meta{},
-		Vars:  []string{"test"},
-		Tasks: []deployment.Task{task},
-	}
-
-	// Ensure manifest "test.yml" present in manifests folder
-	// Setup server
-	mem := store.New()
-	server := New(mem)
-	server.playbooks = map[string]*deployment.Playbook{p.ID: p}
-	// engine := server.Handler()
-
-	// Ensure instance present in etcd
-	// Call endpoint
-	// Assert successful deploy
-	// Teardown kubernetes topography
 }

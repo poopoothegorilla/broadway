@@ -8,55 +8,100 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestCreateInstanceFromMissingPlaybook(t *testing.T) {
+	nt := newNotificationTestHelper()
+	defer nt.Close()
+	store := store.New()
+	is := NewInstanceService(store)
+
+	i := &instance.Instance{PlaybookID: "vanishing-pb", ID: "gone"}
+	_, err := is.Create(i)
+
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "playbook vanishing-pb is missing")
+}
+
+func TestCreateInstanceWithIncorrectVars(t *testing.T) {
+	nt := newNotificationTestHelper()
+	defer nt.Close()
+	store := store.New()
+	is := NewInstanceService(store)
+
+	i := &instance.Instance{PlaybookID: "helloplaybook", ID: "TestCreateInstanceWithIncorrectVars", Vars: map[string]string{"metal": "plutonium"}}
+	ii, err := is.Create(i)
+	assert.Nil(t, ii)
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "does not declare a var named metal")
+}
+
+func TestCreateInstanceNotification(t *testing.T) {
+	nt := newNotificationTestHelper()
+	defer nt.Close()
+
+	store := store.New()
+	is := NewInstanceService(store)
+	i := &instance.Instance{PlaybookID: "helloplaybook", ID: "TestCreateInstanceNotification"}
+	_, err := is.Create(i)
+	assert.Nil(t, err)
+
+	assert.Contains(t, nt.requestBody, "created")
+	assert.Contains(t, nt.requestBody, "helloplaybook")
+	assert.Contains(t, nt.requestBody, "TestCreateInstanceNotification")
+}
+
 func TestCreateInstance(t *testing.T) {
 	nt := newNotificationTestHelper()
 	defer nt.Close()
 	store := store.New()
-	service := NewInstanceService(store)
+	is := NewInstanceService(store)
 
-	i := &instance.Instance{PlaybookID: "test", ID: "222"}
-	createdInstance, err := service.Create(i)
+	i := &instance.Instance{PlaybookID: "helloplaybook", ID: "TestCreateInstance"}
+	ii, err := is.Create(i)
 	assert.Nil(t, err)
-	assert.Equal(t, "test", createdInstance.PlaybookID)
-	assert.Equal(t, instance.StatusNew, createdInstance.Status)
-	assert.Contains(t, nt.requestBody, "created")
+	assert.Equal(t, "helloplaybook", ii.PlaybookID)
+	assert.Equal(t, instance.StatusNew, ii.Status)
+	assert.Equal(t, "", ii.Vars["word"]) // Should be available since helloplaybook defines this var
 }
 
 func TestShow(t *testing.T) {
-	store := store.New()
-	service := NewInstanceService(store)
+	nt := newNotificationTestHelper()
+	defer nt.Close()
 
-	i := &instance.Instance{PlaybookID: "test", ID: "222"}
-	createdInstance, err := service.Create(i)
-	i, err = service.Show(i.PlaybookID, i.ID)
+	store := store.New()
+	is := NewInstanceService(store)
+
+	i := &instance.Instance{PlaybookID: "helloplaybook", ID: "TestShow"}
+	ii, err := is.Create(i)
 	assert.Nil(t, err)
-	assert.Equal(t, createdInstance, i)
+	assert.Equal(t, "helloplaybook", ii.PlaybookID)
+	assert.Equal(t, "TestShow", ii.ID)
 }
 
 func TestShowMissingInstance(t *testing.T) {
 	store := store.New()
-	service := NewInstanceService(store)
+	is := NewInstanceService(store)
 
-	i := &instance.Instance{PlaybookID: "test", ID: "broken"}
-	i, err := service.Show(i.PlaybookID, i.ID)
+	i := &instance.Instance{PlaybookID: "helloplaybook", ID: "broken"}
+	i, err := is.Show(i.PlaybookID, i.ID)
 	assert.NotNil(t, err)
-	assert.Nil(t, i, "PlaybookID should be empty")
+	assert.Nil(t, i, "Instance should be nil")
 }
 
 func TestAllWithPlaybookID(t *testing.T) {
 	nt := newNotificationTestHelper()
 	defer nt.Close()
-	service := NewInstanceService(store.New())
+	is := NewInstanceService(store.New())
 
-	i := &instance.Instance{PlaybookID: "none", ID: "none"}
-	_, err := service.Create(i)
+	i := &instance.Instance{PlaybookID: "helloplaybook", ID: "TestAllWithPlaybookID"}
+	_, err := is.Create(i)
 	if err != nil {
 		t.Fail()
 	}
 
-	instances, err := service.AllWithPlaybookID(i.PlaybookID)
+	instances, err := is.AllWithPlaybookID(i.PlaybookID)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, instances)
+	assert.Contains(t, nt.requestBody, "created")
 }
 
 func TestUpdate(t *testing.T) {
@@ -73,9 +118,9 @@ func TestUpdate(t *testing.T) {
 	}{
 		{
 			"When the instance have all the needed values",
-			&instance.Instance{PlaybookID: "foo", ID: "bar"},
-			"bar",
-			"foo",
+			&instance.Instance{PlaybookID: "helloplaybook", ID: "TestUpdate"},
+			"helloplaybook",
+			"TestUpdate",
 			map[string]string{},
 			nil,
 		},

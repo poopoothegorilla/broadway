@@ -69,11 +69,8 @@ func (s *Server) Init() {
 		glog.Fatal(err)
 	}
 
-	s.playbooks, err = deployment.LoadPlaybookFolder("playbooks/")
-	glog.Info("%+v", s.playbooks)
-	if err != nil {
-		glog.Fatal(err)
-	}
+	s.playbooks = deployment.AllPlaybooks
+	glog.Infof("Server Playbooks: %+v", s.playbooks)
 }
 
 func (s *Server) setupHandlers() {

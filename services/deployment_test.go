@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/namely/broadway/deployment"
+	"github.com/namely/broadway/env"
 	"github.com/namely/broadway/instance"
 	"github.com/namely/broadway/store"
 )
@@ -14,12 +15,12 @@ import (
 func TestDeployment(t *testing.T) {
 	nt := newNotificationTestHelper()
 	defer nt.Close()
-	manifests, err := NewManifestService("../examples/manifests/").LoadManifestFolder()
+	manifests, err := NewManifestService(env.ManifestsPath).LoadManifestFolder()
 	if err != nil {
 		panic(err)
 	}
 
-	playbooks, err := deployment.LoadPlaybookFolder("../examples/playbooks")
+	playbooks, err := deployment.LoadPlaybookFolder(env.PlaybooksPath)
 	if err != nil {
 		panic(err)
 	}

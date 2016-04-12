@@ -54,7 +54,7 @@ func (c *setvarCommand) Execute() (string, error) {
 		}
 		if c.playbookContainsVar(i.PlaybookID, tmp[0]) {
 			i.Vars[tmp[0]] = tmp[1]
-			commandMsg = fmt.Sprintf("Instance %s %s updated it's variables",
+			commandMsg = fmt.Sprintf("Instance %s %s updated its variables",
 				i.PlaybookID,
 				i.ID)
 		} else {

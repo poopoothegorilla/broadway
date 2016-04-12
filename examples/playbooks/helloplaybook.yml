@@ -1,0 +1,8 @@
+id: helloplaybook
+name: Hello Word Playbook
+vars: 
+  - word
+  - bird
+tasks:
+  - name: Deployment Task
+    pod_manifest: hello.deploy
