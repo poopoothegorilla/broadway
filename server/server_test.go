@@ -366,7 +366,7 @@ func TestDeleteWhenExistentInstance(t *testing.T) {
 	}
 	req, w := testutils.DeleteRequest(
 		t,
-		fmt.Sprintf("/%s/%s", testInstance1.PlaybookID, testInstance1.ID),
+		fmt.Sprintf("/instances/%s/%s", testInstance1.PlaybookID, testInstance1.ID),
 	)
 
 	req = auth(req)

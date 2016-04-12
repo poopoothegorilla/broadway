@@ -87,7 +87,7 @@ func (s *Server) setupHandlers() {
 	s.engine.GET("/instances/:playbookID", s.getInstances)
 	s.engine.GET("/status/:playbookID/:instanceID", s.getStatus)
 	s.engine.POST("/deploy/:playbookID/:instanceID", s.deployInstance)
-	s.engine.DELETE("/:playbookID/:instanceID", s.deleteInstance)
+	s.engine.DELETE("/instances/:playbookID/:instanceID", s.deleteInstance)
 }
 
 // Handler returns a reference to the Gin engine that powers Server
