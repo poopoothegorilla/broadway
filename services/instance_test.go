@@ -153,7 +153,7 @@ func TestDeleteWhenExistentInstance(t *testing.T) {
 		t.Log(err)
 	}
 	err = is.Delete(createdInstance)
-	assert.Nil(t, err, "When existent instance")
+	assert.Nil(t, err, "When instance exists")
 }
 
 func TestDeleteWhenNonExistantInstance(t *testing.T) {
