@@ -92,6 +92,42 @@ func TestSetvarExecute(t *testing.T) {
 	}
 }
 
+func TestDelete(t *testing.T) {
+	nt := newNotificationTestHelper()
+	defer nt.Close()
+	testcases := []struct {
+		Scenario string
+		Instance *instance.Instance
+		Args     string
+		Expected string
+		E        error
+	}{
+		{
+			"When a proper delete syntax is sent",
+			&instance.Instance{PlaybookID: "helloplaybook", ID: "randomid"},
+			"delete helloplaybook randomid",
+			"Instance successfully deleted",
+			nil,
+		},
+	}
+	is := NewInstanceService(store.New())
+	for _, testcase := range testcases {
+		_, err := is.Create(testcase.Instance)
+		if err != nil {
+			t.Log(err)
+		}
+		command := BuildSlackCommand(
+			testcase.Args,
+			is,
+			map[string]*deployment.Playbook{"helloplaybook": &deployment.Playbook{ID: "randomapp"}},
+		)
+
+		msg, err := command.Execute()
+		assert.Equal(t, err, testcase.E, testcase.Scenario)
+		assert.Equal(t, msg, testcase.Expected, testcase.Scenario)
+	}
+}
+
 func TestHelpExecute(t *testing.T) {
 	testcases := []struct {
 		Scenario string

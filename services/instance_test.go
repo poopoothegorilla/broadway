@@ -146,11 +146,11 @@ func TestDeleteWhenExistentInstance(t *testing.T) {
 	defer nt.Close()
 	is := NewInstanceService(store.New())
 
-	i := &instance.Instance{PlaybookID: "foo", ID: "bar"}
+	i := &instance.Instance{PlaybookID: "helloplaybook", ID: "new"}
 
 	createdInstance, err := is.Create(i)
 	if err != nil {
-		t.Fail()
+		t.Log(err)
 	}
 	err = is.Delete(createdInstance)
 	assert.Nil(t, err, "When existent instance")
