@@ -87,6 +87,7 @@ func (s *Server) setupHandlers() {
 	s.engine.GET("/instances/:playbookID", s.getInstances)
 	s.engine.GET("/status/:playbookID/:instanceID", s.getStatus)
 	s.engine.POST("/deploy/:playbookID/:instanceID", s.deployInstance)
+	s.engine.DELETE("/:playbookID/:instanceID", s.deleteInstance)
 }
 
 // Handler returns a reference to the Gin engine that powers Server
@@ -263,4 +264,18 @@ func (s *Server) deployInstance(c *gin.Context) {
 		}
 	}
 	c.JSON(http.StatusOK, i)
+}
+
+func (s *Server) deleteInstance(c *gin.Context) {
+	is := services.NewInstanceService(s.store)
+	ii, err := is.Show(c.Param("playbookID"), c.Param("instanceID"))
+	if err != nil {
+		c.JSON(http.StatusNotFound, NotFoundError)
+		return
+	}
+	err = is.Delete(ii)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, InternalError)
+	}
+	c.JSON(http.StatusOK, "Instance successfully deleted")
 }

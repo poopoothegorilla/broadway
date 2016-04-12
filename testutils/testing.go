@@ -28,6 +28,11 @@ func GetRequest(t *testing.T, route string) (*http.Request, *httptest.ResponseRe
 	return buildRequest(t, "GET", route, []byte{})
 }
 
+// DeleteRequest creates a delete request
+func DeleteRequest(t *testing.T, route string) (*http.Request, *httptest.ResponseRecorder) {
+	return buildRequest(t, "DELETE", route, []byte{})
+}
+
 func buildRequest(t *testing.T, action string, route string, data []byte) (*http.Request, *httptest.ResponseRecorder) {
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(action, route, bytes.NewBuffer(data))
