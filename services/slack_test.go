@@ -109,6 +109,13 @@ func TestDelete(t *testing.T) {
 			"Instance successfully deleted",
 			nil,
 		},
+		{
+			"When missing playbookid",
+			&instance.Instance{PlaybookID: "helloplaybook", ID: "randomid"},
+			"delete randomid",
+			"",
+			&InvalidDelete{},
+		},
 	}
 	is := NewInstanceService(store.New())
 	for _, testcase := range testcases {
