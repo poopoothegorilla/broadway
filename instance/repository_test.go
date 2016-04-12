@@ -103,3 +103,14 @@ func TestFindByPlaybookIDNoExistent(t *testing.T) {
 
 	assert.Equal(t, "Saved data for this instance is malformed", err.Error())
 }
+
+func TestDelete(t *testing.T) {
+	repo := NewRepo(store.New())
+	i := &Instance{PlaybookID: "anewone", ID: "withid"}
+	err := repo.Save(i)
+	if err != nil {
+		t.Fail()
+	}
+	err = repo.Delete(i)
+	assert.Nil(t, err)
+}

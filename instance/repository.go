@@ -14,6 +14,7 @@ type Repository interface {
 	FindByPath(path string) (*Instance, error)
 	FindByID(playbookID, ID string) (*Instance, error)
 	FindByPlaybookID(playbookID string) ([]*Instance, error)
+	Delete(*Instance) error
 }
 
 // Repo handles persistence logic
@@ -91,4 +92,8 @@ func (ir *Repo) FindByPlaybookID(playbookID string) ([]*Instance, error) {
 	}
 
 	return instances, nil
+}
+
+func (ir *Repo) Delete(i *Instance) error {
+	return ir.store.Delete(i.Path())
 }
