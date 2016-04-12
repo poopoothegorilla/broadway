@@ -58,6 +58,15 @@ func (is *InstanceService) AllWithPlaybookID(playbookID string) ([]*instance.Ins
 	return is.repo.FindByPlaybookID(playbookID)
 }
 
+func (is *InstanceService) Delete(i *instance.Instance) error {
+	ii, err := is.Show(i.PlaybookID, i.ID)
+	if err != nil {
+		return err
+	}
+
+	return is.repo.Delete(ii)
+}
+
 func sendCreationNotification(i *instance.Instance) error {
 	m := &notification.Message{
 		Attachments: []notification.Attachment{
