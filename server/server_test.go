@@ -296,6 +296,27 @@ func TestSlackCommandSetvar(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code, "Expected slack command to be 200")
 }
 
+func TestSlackCommandDelete(t *testing.T) {
+	env.SlackToken = testToken
+	w, server := helperSetupServer()
+	req, _ := http.NewRequest("POST", "/command", nil)
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	form := url.Values{}
+	form.Set("token", testToken)
+	form.Set("command", "/broadway")
+	form.Set("text", "delete helloplaybook forserver")
+	req.PostForm = form
+
+	i := &instance.Instance{PlaybookID: "helloplaybook", ID: "forserver"}
+	is := services.NewInstanceService(store.New())
+	_, err := is.Create(i)
+	if err != nil {
+		t.Log(err)
+	}
+	server.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code, "Expected delete slack command to be 200")
+}
+
 func TestPostCommandDeployBad(t *testing.T) {
 	env.SlackToken = testToken
 	w, server := helperSetupServer()
