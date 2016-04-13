@@ -94,7 +94,7 @@ func (ir *Repo) FindByPlaybookID(playbookID string) ([]*Instance, error) {
 	return instances, nil
 }
 
-// Delete remove an instance
+// Delete removes an instance
 func (ir *Repo) Delete(i *Instance) error {
 	return ir.store.Delete(i.Path())
 }
