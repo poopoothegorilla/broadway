@@ -53,7 +53,7 @@ func TestFindByPathWhenMalformedData(t *testing.T) {
 
 	_, err := repo.FindByPath(i.Path())
 	assert.NotNil(t, err)
-	assert.Equal(t, "Saved data for this instance is malformed", err.Error())
+	assert.IsType(t, MalformedSavedData{}, err)
 }
 
 func TestFindByID(t *testing.T) {
@@ -64,6 +64,7 @@ func TestFindByID(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
 	instance, err := repo.FindByID(i.PlaybookID, i.ID)
 	assert.Nil(t, err)
 	assert.Equal(t, "created", instance.PlaybookID)
@@ -72,11 +73,12 @@ func TestFindByID(t *testing.T) {
 func TestFindByPlaybookIDOne(t *testing.T) {
 	repo := NewRepo(store.New())
 	i := &Instance{PlaybookID: "one", ID: "222"}
-	err := repo.Save(i)
 
+	err := repo.Save(i)
 	if err != nil {
-		t.Fail()
+		t.Fatal("TestFindByPlaybookIDOne: ", err)
 	}
+
 	instances, err := repo.FindByPlaybookID(i.PlaybookID)
 	assert.Nil(t, err)
 	assert.Len(t, instances, 1)
@@ -101,16 +103,22 @@ func TestFindByPlaybookIDNoExistent(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Empty(t, instances)
 
-	assert.Equal(t, "Saved data for this instance is malformed", err.Error())
+	assert.IsType(t, MalformedSavedData{}, err)
 }
 
 func TestDelete(t *testing.T) {
-	repo := NewRepo(store.New())
+	s := store.New()
+	repo := NewRepo(s)
 	i := &Instance{PlaybookID: "anewone", ID: "withid"}
 	err := repo.Save(i)
 	if err != nil {
-		t.Fail()
+		t.Fatal("TestDelete: ", err)
 	}
+
 	err = repo.Delete(i)
 	assert.Nil(t, err)
+
+	i, err = repo.FindByID("anewone", "withid")
+	assert.IsType(t, NotFound{}, err)
+	assert.Nil(t, i)
 }
