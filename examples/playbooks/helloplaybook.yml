@@ -5,4 +5,4 @@ vars:
   - bird
 tasks:
   - name: Deployment Task
-    pod_manifest: hello.deploy
+    pod_manifest: hello-pod

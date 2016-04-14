@@ -122,3 +122,14 @@ func TestDelete(t *testing.T) {
 	assert.IsType(t, NotFound{}, err)
 	assert.Nil(t, i)
 }
+
+func TestDelete(t *testing.T) {
+	repo := NewRepo(store.New())
+	i := &Instance{PlaybookID: "anewone", ID: "withid"}
+	err := repo.Save(i)
+	if err != nil {
+		t.Fail()
+	}
+	err = repo.Delete(i)
+	assert.Nil(t, err)
+}
