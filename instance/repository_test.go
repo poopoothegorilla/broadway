@@ -73,11 +73,12 @@ func TestFindByID(t *testing.T) {
 func TestFindByPlaybookIDOne(t *testing.T) {
 	repo := NewRepo(store.New())
 	i := &Instance{PlaybookID: "one", ID: "222"}
-	err := repo.Save(i)
 
+	err := repo.Save(i)
 	if err != nil {
-		t.Fail()
+		t.Fatal("TestFindByPlaybookIDOne: ", err)
 	}
+
 	instances, err := repo.FindByPlaybookID(i.PlaybookID)
 	assert.Nil(t, err)
 	assert.Len(t, instances, 1)
@@ -108,9 +109,10 @@ func TestFindByPlaybookIDNoExistent(t *testing.T) {
 func TestDelete(t *testing.T) {
 	repo := NewRepo(store.New())
 	i := &Instance{PlaybookID: "anewone", ID: "withid"}
+
 	err := repo.Save(i)
 	if err != nil {
-		t.Fail()
+		t.Fatal("TestDelete: ", err)
 	}
 	err = repo.Delete(i)
 	assert.Nil(t, err)
