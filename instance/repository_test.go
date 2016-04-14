@@ -114,6 +114,11 @@ func TestDelete(t *testing.T) {
 	if err != nil {
 		t.Fatal("TestDelete: ", err)
 	}
+
 	err = repo.Delete(i)
 	assert.Nil(t, err)
+
+	i, err = repo.FindByID("anewone", "withid")
+	assert.IsType(t, NotFound{}, err)
+	assert.Nil(t, i)
 }
