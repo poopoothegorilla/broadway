@@ -95,7 +95,7 @@ func TestAllWithPlaybookID(t *testing.T) {
 	i := &instance.Instance{PlaybookID: "helloplaybook", ID: "TestAllWithPlaybookID"}
 	_, err := is.Create(i)
 	if err != nil {
-		t.Fatal(testcase.Scenario, err)
+		t.Fatal("TestAllWithPlaybookID: ", err)
 	}
 
 	instances, err := is.AllWithPlaybookID(i.PlaybookID)
