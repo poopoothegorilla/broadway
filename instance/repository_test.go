@@ -53,7 +53,7 @@ func TestFindByPathWhenMalformedData(t *testing.T) {
 
 	_, err := repo.FindByPath(i.Path())
 	assert.NotNil(t, err)
-	assert.Equal(t, "Saved data for this instance is malformed", err.Error())
+	assert.IsType(t, MalformedSavedData{}, err)
 }
 
 func TestFindByID(t *testing.T) {
@@ -64,6 +64,7 @@ func TestFindByID(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
 	instance, err := repo.FindByID(i.PlaybookID, i.ID)
 	assert.Nil(t, err)
 	assert.Equal(t, "created", instance.PlaybookID)
@@ -101,7 +102,7 @@ func TestFindByPlaybookIDNoExistent(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Empty(t, instances)
 
-	assert.Equal(t, "Saved data for this instance is malformed", err.Error())
+	assert.IsType(t, MalformedSavedData{}, err)
 }
 
 func TestDelete(t *testing.T) {
