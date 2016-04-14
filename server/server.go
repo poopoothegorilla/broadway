@@ -41,7 +41,7 @@ var UnauthorizedError = ErrorResponse{"error": "Unauthorized"}
 var NotFoundError = ErrorResponse{"error": "Not Found"}
 
 // InternalError represents a JSON response for status 500
-var InternalError = map[string]string{"error": "Internal Server Error"}
+var InternalError = ErrorResponse{"error": "Internal Server Error"}
 
 // CustomError creates an ErrorResponse with a custom message
 func CustomError(message string) ErrorResponse {
@@ -223,10 +223,10 @@ func (s *Server) postCommand(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, UnauthorizedError)
 		return
 	}
+
 	is := services.NewInstanceService(s.store)
 	slackCommand := services.BuildSlackCommand(form.Text, is, s.playbooks)
 	msg, err := slackCommand.Execute()
-
 	if err != nil {
 		c.JSON(http.StatusOK, err)
 		return
@@ -270,12 +270,24 @@ func (s *Server) deleteInstance(c *gin.Context) {
 	is := services.NewInstanceService(s.store)
 	ii, err := is.Show(c.Param("playbookID"), c.Param("instanceID"))
 	if err != nil {
-		c.JSON(http.StatusNotFound, NotFoundError)
-		return
+		switch err.(type) {
+		case instance.MalformedSavedData:
+			c.JSON(http.StatusInternalServerError, CustomError(err.Error()))
+			return
+		case instance.NotFound:
+			c.JSON(http.StatusNotFound, NotFoundError)
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, InternalError)
+			return
+		}
 	}
+
 	err = is.Delete(ii)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, InternalError)
+		return
 	}
+
 	c.JSON(http.StatusOK, "Instance successfully deleted")
 }
