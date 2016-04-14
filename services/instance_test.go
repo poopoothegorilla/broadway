@@ -95,7 +95,7 @@ func TestAllWithPlaybookID(t *testing.T) {
 	i := &instance.Instance{PlaybookID: "helloplaybook", ID: "TestAllWithPlaybookID"}
 	_, err := is.Create(i)
 	if err != nil {
-		t.Fail()
+		t.Fatal(testcase.Scenario, err)
 	}
 
 	instances, err := is.AllWithPlaybookID(i.PlaybookID)
@@ -129,7 +129,7 @@ func TestUpdate(t *testing.T) {
 	for _, testcase := range testcases {
 		createdInstance, err := instanceService.Create(testcase.Instance)
 		if err != nil {
-			t.Fail()
+			t.Fatal(testcase.Scenario, err)
 		}
 		createdInstance.PlaybookID = testcase.ExpectedPlaybookID
 		createdInstance.ID = testcase.ExpectedID
