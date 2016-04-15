@@ -29,7 +29,7 @@ func makeRequest(req *http.Request, w *httptest.ResponseRecorder) {
 }
 
 func auth(req *http.Request) *http.Request {
-	req.Header.Add("Authorization", "Bearer "+env.AuthBearerToken)
+	req.Header.Set("Authorization", "Bearer "+env.AuthBearerToken)
 	return req
 }
 
@@ -51,7 +51,7 @@ func TestAuthFailure(t *testing.T) {
 	env.AuthBearerToken = "testtoken"
 	w, server := helperSetupServer()
 	req, _ := http.NewRequest("GET", "/", nil)
-	req.Header.Add("Authorization", "Bearer faketoken")
+	req.Header.Set("Authorization", "Bearer faketoken")
 	server.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusUnauthorized, w.Code, "Expected POST / with wrong auth token to be 401")
 }
@@ -60,7 +60,7 @@ func TestAuthSuccess(t *testing.T) {
 	env.AuthBearerToken = "testtoken"
 	w, server := helperSetupServer()
 	req, _ := http.NewRequest("GET", "/", nil)
-	req.Header.Add("Authorization", "Bearer testtoken")
+	req.Header.Set("Authorization", "Bearer testtoken")
 	server.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code, "Expected POST / with correct auth token to be 200")
 }
@@ -69,7 +69,7 @@ func TestAuthFailureHints(t *testing.T) {
 	env.AuthBearerToken = "testtoken"
 	w, server := helperSetupServer()
 	req, _ := http.NewRequest("GET", "/", nil)
-	req.Header.Add("Authorization", "Bearer faketoken")
+	req.Header.Set("Authorization", "Bearer faketoken")
 	server.ServeHTTP(w, req)
 	assert.Contains(t, w.Body.String(), "Wrong")
 
@@ -242,7 +242,7 @@ func TestPostCommandMissingToken(t *testing.T) {
 	w, server := helperSetupServer()
 	formBytes := bytes.NewBufferString("not a form")
 	req, _ := http.NewRequest("POST", "/command", formBytes)
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	server.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusUnauthorized, w.Code, "Expected POST /command with bad body to be 401")
@@ -251,7 +251,7 @@ func TestPostCommandWrongToken(t *testing.T) {
 	env.SlackToken = testToken
 	w, server := helperSetupServer()
 	req, _ := http.NewRequest("POST", "/command", nil)
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	form := url.Values{}
 	form.Set("token", "wrongtoken")
 	req.PostForm = form
@@ -263,7 +263,7 @@ func TestPostCommandHelp(t *testing.T) {
 	env.SlackToken = testToken
 	w, server := helperSetupServer()
 	req, _ := http.NewRequest("POST", "/command", nil)
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	form := url.Values{}
 	form.Set("token", testToken)
 	form.Set("command", "/broadway")
@@ -279,7 +279,7 @@ func TestSlackCommandSetvar(t *testing.T) {
 	env.SlackToken = testToken
 	w, server := helperSetupServer()
 	req, _ := http.NewRequest("POST", "/command", nil)
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	form := url.Values{}
 	form.Set("token", testToken)
 	form.Set("command", "/broadway")
@@ -300,7 +300,7 @@ func TestSlackCommandDelete(t *testing.T) {
 	env.SlackToken = testToken
 	w, server := helperSetupServer()
 	req, _ := http.NewRequest("POST", "/command", nil)
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	form := url.Values{}
 	form.Set("token", testToken)
 	form.Set("command", "/broadway")
@@ -321,7 +321,7 @@ func TestPostCommandDeployBad(t *testing.T) {
 	env.SlackToken = testToken
 	w, server := helperSetupServer()
 	req, _ := http.NewRequest("POST", "/command", nil)
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	form := url.Values{}
 	form.Set("token", testToken)
 	form.Set("command", "/broadway")
