@@ -59,7 +59,7 @@ func TestDeployment(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		err = service.Deploy(c.Instance)
+		err = service.DeployAndNotify(c.Instance)
 		assert.Equal(t, c.Error, err)
 		assert.EqualValues(t, c.Expected, c.Instance.Status)
 	}
