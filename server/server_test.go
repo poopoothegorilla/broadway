@@ -196,8 +196,7 @@ func TestGetStatusWithGoodPath(t *testing.T) {
 	is := services.NewInstanceService(store.New())
 	_, err := is.Create(testInstance1)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	req, w := testutils.GetRequest(t, "/status/helloplaybook/TestGetStatusWithGoodPath")
 	req = auth(req)
@@ -361,8 +360,7 @@ func TestDeleteWhenExistentInstance(t *testing.T) {
 	is := services.NewInstanceService(store.New())
 	_, err := is.Create(testInstance1)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	req, w := testutils.DeleteRequest(
 		t,
